@@ -84,7 +84,7 @@ int find_child(struct dir_struct *child, int parent, int offset)
 	
 	if (file == NULL)
 	{
-		fprintf(log_file, "--Cannot read file. Exit from find_child\n");
+		fprintf(log_file, "Cannot read file. Exit from find_child\n");
 		fflush(log_file);
 		return -2;
 	}
