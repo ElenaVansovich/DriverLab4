@@ -168,6 +168,8 @@ int delete(int id)
 	
 	fprintf(log_file, "Return 0\n");
 	
+
+
 	fflush(log_file);
 	
 	current_dir_amount = current_dir_amount - 1;
