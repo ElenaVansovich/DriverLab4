@@ -219,7 +219,6 @@ int find_by_path(const char* path)
 				memset(subdir, 0, 255);
 				strcpy(subdir, path + start);
 				end = len - start;
-				
 			}
 			else
 			{
