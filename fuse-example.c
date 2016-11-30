@@ -11,14 +11,16 @@
 int current_dir_amount = 0;
 FILE *log_file;
 
-struct dir_struct {
+struct dir_struct
+{
 	int id;
 	int empty;
 	int parent_id;
 	char dir_name[255];
 };
 
-void * init_callback(){
+void * init_callback()
+{
 	log_file = fopen("filesystem.log", "wb");
 	FILE* file = fopen(FILENAME, "wb");
 	
@@ -28,7 +30,8 @@ void * init_callback(){
 	ds.empty = 1;
 	ds.parent_id = -1;	
 	
-	for (i = 0; i < DIR_AMOUNT; i++) {
+	for (i = 0; i < DIR_AMOUNT; i++)
+	{
 		ds.id = i;
 		fwrite(&ds, sizeof(struct dir_struct), 1, file);
 	}
@@ -41,7 +44,8 @@ void * init_callback(){
 	return v;
 }
 
-void destroy_callback(void* private_data){
+void destroy_callback(void* private_data)
+{
 	fflush(log_file);
 	fclose(log_file);
 }
@@ -50,7 +54,8 @@ int find(const char* dir, int parent)
 {
 	FILE* file = fopen(FILENAME, "rb");
 	
-	if (file == NULL) {
+	if (file == NULL)
+	{
 
 		return -2;
 	}
@@ -59,8 +64,10 @@ int find(const char* dir, int parent)
 	
 	memset(&ds, 0, sizeof(struct dir_struct));
 
-	while(!feof(file) && fread(&ds, sizeof(struct dir_struct), 1, file) > 0) {
-		if (ds.empty == 0 && ds.parent_id == parent && strcmp(ds.dir_name, dir) == 0) {
+	while(!feof(file) && fread(&ds, sizeof(struct dir_struct), 1, file) > 0)
+	{
+		if (ds.empty == 0 && ds.parent_id == parent && strcmp(ds.dir_name, dir) == 0)
+		{
 			fclose(file);
 			return ds.id;
 		}
@@ -75,7 +82,8 @@ int find_child(struct dir_struct *child, int parent, int offset)
 {
 	FILE* file = fopen(FILENAME, "rb");
 	
-	if (file == NULL) {
+	if (file == NULL)
+	{
 		fprintf(log_file, "--Cannot read file. Exit from find_child\n");
 		fflush(log_file);
 		return -2;
@@ -85,14 +93,17 @@ int find_child(struct dir_struct *child, int parent, int offset)
 	memset(child, 0, sizeof(struct dir_struct));
 	int counter = 0;
 	
-	while(!feof(file) && fread(child, sizeof(struct dir_struct), 1, file) > 0) {
+	while(!feof(file) && fread(child, sizeof(struct dir_struct), 1, file) > 0)
+	{
 		counter ++;
-		if (counter % 50 == 0) {
+		if (counter % 50 == 0)
+		{
 			fprintf(log_file, "Read %d\n", counter);
 			fflush(log_file);
 		}
 	
-		if (child->empty == 0 && child->parent_id == parent) {
+		if (child->empty == 0 && child->parent_id == parent)
+		{
 			fprintf(log_file, "Return %d\n", child->id);
 			fflush(log_file);
 			fclose(file);
@@ -114,8 +125,10 @@ int add(struct dir_struct *dir)
 	
 	memset(&ds, 0, sizeof(struct dir_struct));
 	
-	while(!feof(file) && fread(&ds, sizeof(struct dir_struct), 1, file) > 0) {
-		if (ds.empty) {
+	while(!feof(file) && fread(&ds, sizeof(struct dir_struct), 1, file) > 0)
+	{
+		if (ds.empty)
+		{
 			fseek(file, ds.id * sizeof(struct dir_struct), SEEK_SET);
 			dir->id = ds.id;
 			fwrite(dir, sizeof(struct dir_struct), 1, file);
@@ -137,7 +150,8 @@ int delete(int id)
 {
 	FILE* file = fopen(FILENAME, "rb+");
 	
-	if (file == NULL) {
+	if (file == NULL)
+	{
 		fprintf(log_file, "Cannot read file. Exit from find_child\n");
 		fflush(log_file);
 		return -2;
@@ -165,7 +179,8 @@ int ren_ame(struct dir_struct *dir)
 {
 	FILE* file = fopen(FILENAME, "rb+");
 	
-	if (file == NULL) {
+	if (file == NULL)
+	{
 		fprintf(log_file, "Cannot read file. Exit from find_child\n");
 		fflush(log_file);
 		return -2;
@@ -190,25 +205,31 @@ int find_by_path(const char* path)
 	char *endp = NULL;
 	int start = 1, end = 0, len = strlen(path), parent = -1, id = -1;
 
-	if (strcmp("/", path) == 0) {
+	if (strcmp("/", path) == 0)
+	{
 		return -1;
 	} 
 	else 
 	{
-		while(start <= len - 1) {
+		while(start <= len - 1)
+		{
 			endp = strchr(path + start, '/');
-			if(endp == NULL) {
+			if(endp == NULL)
+			{
 				memset(subdir, 0, 255);
 				strcpy(subdir, path + start);
 				end = len - start;
 				
-			} else {
+			}
+			else
+			{
 				end = endp - path - start;
 				memset(subdir, 0, 255);
 				strncpy(subdir, path + start, end);
 			}
 			id = find(subdir, parent);
-			if (id < -1) {
+			if (id < -1)
+			{
 				return -2;
 			}
 			parent = id;
@@ -226,15 +247,18 @@ int find_by_parent(const char* path, struct dir_struct *ds)
 	int start = 1, end = 0, len = strlen(path), parent = -1, id = -1;
 	
 
-	if (strcmp("/", path) == 0) {
+	if (strcmp("/", path) == 0)
+	{
 		fprintf(log_file, "Exit from mkdir 1: return 0\n");
 		return -1;
 	} 
 	else 
 	{
-		while(start <= len - 1) {
+		while(start <= len - 1)
+		{
 			endp = strchr(path + start, '/');
-			if(endp == NULL) {
+			if(endp == NULL)
+			{
 				memset(subdir, 0, 255);
 				strcpy(subdir, path + start);
 				break;
@@ -243,7 +267,8 @@ int find_by_parent(const char* path, struct dir_struct *ds)
 			memset(subdir, 0, 255);
 			strncpy(subdir, path + start, end);
 			id = find(subdir, parent);
-			if (id < -1) {
+			if (id < -1)
+			{
 				return -2;
 			}
 			parent = id;
@@ -262,7 +287,8 @@ int find_by_parent(const char* path, struct dir_struct *ds)
 }
 
 
-static int getattr_callback(const char *path, struct stat *stbuf) {
+static int getattr_callback(const char *path, struct stat *stbuf)
+{
   	fprintf(log_file, "----Enter to getattr\n");
 	
 	int len = strlen(path), id = -1;
@@ -274,11 +300,13 @@ static int getattr_callback(const char *path, struct stat *stbuf) {
 	fflush(log_file);
 	id = find_by_path(path);
 	
-	if (id < -1) {
+	if (id < -1)
+	{
 		return -ENOENT;
 	}
 	
-	if (id == -1) {
+	if (id == -1)
+	{
 		stbuf->st_mode = S_IFDIR | 0755;
 		stbuf->st_nlink = 2;
 		fprintf(log_file, "----Exit from getattr1: return 0\n");
@@ -287,7 +315,7 @@ static int getattr_callback(const char *path, struct stat *stbuf) {
 	} 
 	
 	stbuf->st_mode = S_IFDIR | 0777;
-    stbuf->st_nlink = 2;
+    	stbuf->st_nlink = 2;
 	
 	fprintf(log_file, "----Exit from getattr2: return 0\n");
 	fflush(log_file);
@@ -304,17 +332,20 @@ int rmdir_callback(const char* path)
 	fflush(log_file);
 	id = find_by_path(path);
 	
-	if (id < -1) {
+	if (id < -1)
+	{
 		return -ENOENT;
 	}
 	
-	if (id == -1) {
+	if (id == -1)
+	{
 		return -EBUSY;
 	}
 	
-	if (find_child(&ds, id, 0) > -1) {
-    	return -ENOTEMPTY;
-    }
+	if (find_child(&ds, id, 0) > -1)
+	{
+    		return -ENOTEMPTY;
+    	}
 	
 	delete(id);
 	
@@ -323,7 +354,8 @@ int rmdir_callback(const char* path)
 
 int mkdir_callback(const char* path, mode_t mode)
 {
-	if (current_dir_amount == DIR_AMOUNT) {
+	if (current_dir_amount == DIR_AMOUNT)
+	{
 		return -ENOSPC;
 	}
 	
@@ -337,10 +369,12 @@ int mkdir_callback(const char* path, mode_t mode)
 	fprintf(log_file, "path len: %d\n", len);
 	fflush(log_file);
 	res = find_by_parent(path, &ds);
-	if (res == -1) {
+	if (res == -1)
+	{
 		return 0;
 	}
-	if (res < -1) {
+	if (res < -1)
+	{
 		return -ENOENT;
 	}
 	fprintf(log_file, "---Add: %d\n", add(&ds));
@@ -354,43 +388,51 @@ int rename_callback(const char* from, const char* to)
 	struct dir_struct ds;
 	int from_id = -2, to_id = -2, res = 0;
 	
-	if (strcmp(from, to) == 0) {
+	if (strcmp(from, to) == 0)
+	{
 		return 0;
 	}
 	
 	from_id = find_by_path(from);
 	
-	if (from_id == -1) {
+	if (from_id == -1)
+	{
 		return -EACCES;
 
 	}
 	
-	if (from_id < -1) {
+	if (from_id < -1)
+	{
 		return -ENOENT;
 	}
 	
 	to_id = find_by_path(to);
 	
-	if (to_id == -1) {
+	if (to_id == -1)
+	{
 		return -EBUSY;
 	}
-	if (to_id > -1 && find_child(&ds, to_id, 0) > -1) {
+	if (to_id > -1 && find_child(&ds, to_id, 0) > -1)
+	{
 		return -ENOTEMPTY;
 	}
-	if (strstr(from, to) != NULL) {
+	if (strstr(from, to) != NULL)
+	{
 		return -EINVAL;
 	}
 	
 	memset(&ds, 0, sizeof(struct dir_struct));
 	res = find_by_parent(to, &ds);
 	
-	if (res < -1) {
+	if (res < -1)
+	{
 		return -ENOENT;
 	}
 	
 	ds.id = from_id;
 	
-	if (to_id > -1) {
+	if (to_id > -1)
+	{
 		delete(to_id);
 	}
 	
@@ -404,25 +446,24 @@ int readdir_callback(const char *path, void *buf, fuse_fill_dir_t filler,
 {
 	struct dir_struct ds;
 	int id = -1, ofst = 0;
-	//fprintf(log_file, "-----readdir path: %s\n", path);
-	//fprintf(log_file, "path len: %d\n", len);
 	id = find_by_path(path);
-	if (id < -1) {
+	if (id < -1)
+	{
 		return -ENOENT;
 	}
 	filler(buf, ".", NULL, 0);
-    filler(buf, "..", NULL, 0);
-    //fprintf(log_file, "----Start filler\n");
-    while ((ofst = find_child(&ds, id, ofst)) > -1) {
-    	//fprintf(log_file, "----Work filler %d\n", ofst);
+    	filler(buf, "..", NULL, 0);
+    	while ((ofst = find_child(&ds, id, ofst)) > -1)
+	{
+    		fflush(log_file);
+    		filler(buf, ds.dir_name, NULL, 0);
+    	}
     	fflush(log_file);
-    	filler(buf, ds.dir_name, NULL, 0);
-    }
-    fflush(log_file);
 	return 0;
 }
 
-static struct fuse_operations fuse_example_operations = {
+static struct fuse_operations fuse_example_operations = 
+{
   .getattr = getattr_callback,
   .init = init_callback,
   .rmdir = rmdir_callback,
